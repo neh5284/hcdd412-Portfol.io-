@@ -21,6 +21,7 @@ export function Dashboard() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [copied, setCopied] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const shareUrl = `${window.location.origin}/portfolio/${portfolio.username}`;
 
@@ -29,14 +30,22 @@ export function Dashboard() {
   }, []);
 
   const loadPortfolioData = async () => {
+    setLoading(true);
+    console.log('Loading portfolio data...');
+
     const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
         .eq('email', 'neh5284@psu.edu')
         .single();
 
-    if (usersError) {
+    console.log('usersData:', usersData);
+    console.log('usersError:', usersError);
+
+    if (usersError || !usersData) {
       console.error('Error loading user:', usersError);
+      alert(`Error loading user: ${usersError?.message || 'User not found'}`);
+      setLoading(false);
       return;
     }
 
@@ -46,8 +55,13 @@ export function Dashboard() {
         .eq('user_id', usersData.id)
         .single();
 
-    if (portfoliosError) {
+    console.log('portfoliosData:', portfoliosData);
+    console.log('portfoliosError:', portfoliosError);
+
+    if (portfoliosError || !portfoliosData) {
       console.error('Error loading portfolio:', portfoliosError);
+      alert(`Error loading portfolio: ${portfoliosError?.message || 'Portfolio not found'}`);
+      setLoading(false);
       return;
     }
 
@@ -57,8 +71,13 @@ export function Dashboard() {
         .eq('portfolio_id', portfoliosData.id)
         .order('created_at', { ascending: false });
 
+    console.log('projectsData:', projectsData);
+    console.log('projectsError:', projectsError);
+
     if (projectsError) {
       console.error('Error loading projects:', projectsError);
+      alert(`Error loading projects: ${projectsError.message}`);
+      setLoading(false);
       return;
     }
 
@@ -80,12 +99,14 @@ export function Dashboard() {
       id: portfoliosData.id,
       userId: usersData.id,
       username: 'neh5284',
-      displayName: usersData.name,
+      displayName: usersData.name || 'Nathan Hinkle',
       bio: portfoliosData.bio || '',
       tagline: 'Building the future, one project at a time.',
       email: usersData.email,
       projects: mappedProjects,
     });
+
+    setLoading(false);
   };
 
   const handleCopyLink = () => {
@@ -95,7 +116,20 @@ export function Dashboard() {
   };
 
   const handleSaveProject = async (projectData: Partial<Project>) => {
-    if (!portfolio.id) return;
+    console.log('handleSaveProject called');
+    console.log('portfolio.id:', portfolio.id);
+    console.log('editingProject:', editingProject);
+    console.log('projectData:', projectData);
+
+    if (!portfolio.id) {
+      alert('Portfolio ID is missing. Data may not have loaded yet.');
+      return;
+    }
+
+    if (!projectData.title || !projectData.description) {
+      alert('Please fill in the project title and description.');
+      return;
+    }
 
     if (editingProject) {
       const { error } = await supabase
@@ -110,8 +144,11 @@ export function Dashboard() {
 
       if (error) {
         console.error('Error updating project:', error);
+        alert(`Error updating project: ${error.message}`);
         return;
       }
+
+      alert('Project updated successfully.');
     } else {
       const { error } = await supabase.from('projects').insert([
         {
@@ -126,13 +163,16 @@ export function Dashboard() {
 
       if (error) {
         console.error('Error creating project:', error);
+        alert(`Error creating project: ${error.message}`);
         return;
       }
+
+      alert('Project created successfully.');
     }
 
     setIsFormOpen(false);
     setEditingProject(null);
-    loadPortfolioData();
+    await loadPortfolioData();
   };
 
   const handleDeleteProject = async (projectId: string) => {
@@ -144,10 +184,12 @@ export function Dashboard() {
 
       if (error) {
         console.error('Error deleting project:', error);
+        alert(`Error deleting project: ${error.message}`);
         return;
       }
 
-      loadPortfolioData();
+      alert('Project deleted successfully.');
+      await loadPortfolioData();
     }
   };
 
@@ -155,6 +197,14 @@ export function Dashboard() {
     setEditingProject(project);
     setIsFormOpen(true);
   };
+
+  if (loading) {
+    return (
+        <div className="min-h-screen bg-white p-10">
+          <h1 className="text-2xl font-bold">Loading dashboard...</h1>
+        </div>
+    );
+  }
 
   return (
       <div className="min-h-screen bg-white">
