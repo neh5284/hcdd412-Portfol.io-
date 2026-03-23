@@ -30,9 +30,11 @@ public class testHarness {
         // --- TEST CASE 2: GitHub Deep Fetch (Live API Mapping) ---
         syncService sync = new syncService();
         List<String> repos = sync.preview("neh5284", "GitHub");
-        // We simulate fetching the first repo in your list
-        Map<String, String> details = sync.fetchRepoDetails(repos.get(0));
-        boolean syncPass = (details != null && !details.isEmpty());
+        // Fetching the actual hcdd412-Portfol.io- project for user neh5284
+        String testOwner = "neh5284";
+        String testRepo = "hcdd412-Portfol.io-";
+        Map<String, String> details = sync.fetchRepoDetails(testOwner, testRepo);
+        boolean syncPass = (details != null && !details.isEmpty() && !"N/A".equals(details.get("stars")));
 
         System.out.println("\n[BLOCK 2] External API (GitHub Deep Fetch)");
         System.out.println("   STATUS: " + (syncPass ? "✅ PASS" : "❌ FAIL"));
@@ -41,10 +43,10 @@ public class testHarness {
         System.out.println("   > Popularity:     " + details.get("stars") + " Stars / " + details.get("forks") + " Forks");
         System.out.println("   > Sync Timestamp: " + details.get("last_commit"));
 
-        // --- TEST 2 & 3: GitHub Live API (Dynamic Fetch) ---
+        // --- TEST 2.5 & 3: GitHub Live API (Dynamic Fetch) ---
         syncService sync2 = new syncService();
-        // PRO TIP: Change "google/gson" to "neh5284/Portfol.io-MVP" if yours is public
-        List<String> liveData = sync2.fetchDynamicCommits("google", "gson");
+        // Fetching live dynamic commits for the specific project
+        List<String> liveData = sync2.fetchDynamicCommits(testOwner, testRepo);
         boolean isApiLive = !liveData.isEmpty();
 
         System.out.println("\n[BLOCK 2 & 3] Live GitHub Content Fetch");
@@ -59,15 +61,39 @@ public class testHarness {
             System.out.println("   > Identified Participants: " + users);
         }
 
-        // --- TEST CASE 4: Database Persistence ---
-        projectService project = new projectService();
-        caseStudy entry = new caseStudy("HCDD Need", "Java Dev", "Working MVP");
-        boolean isSaved = project.addNarrativeSection("PROJ_01", entry);
+        // --- TEST CASE 3.5: Top 10 Committers ---
+        System.out.println("\n[BLOCK 3.5] Top 10 Committers Analysis");
+        List<Map.Entry<String, Integer>> topCommitters = sync2.fetchTopCommitters(testOwner, testRepo);
+        if (topCommitters.isEmpty()) {
+            System.out.println("   STATUS: ❌ FAIL (No committers extracted or API blocked)");
+        } else {
+            System.out.println("   STATUS: ✅ PASS");
+            System.out.println("   > Top Committers for " + testOwner + "/" + testRepo + ":");
+            int rank = 1;
+            for (Map.Entry<String, Integer> committer : topCommitters) {
+                System.out.println("      " + rank + ". " + committer.getKey() + " (" + committer.getValue() + " commits)");
+                rank++;
+            }
+        }
 
-        System.out.println("\n[BLOCK 4] Core Persistence Mapping");
-        System.out.println("   STATUS: " + (isSaved ? "✅ PASS" : "❌ FAIL"));
-        System.out.println("   > DB Status: READY_FOR_INSERT");
-        System.out.println("   > Schema Mapping: Object [caseStudy] -> Table [projects]");
+        // --- TEST CASE 4: Dynamic Metadata Mapping (Supabase Prep) ---
+        // This block consumes the LIVE data from the previous GitHub fetch.
+        System.out.println("\n[BLOCK 4] SQL Persistence & Metadata Mapping");
+        projectService dbService = new projectService();
+
+        // DYNAMIC CHECK: Pass the real list of commits from Block 2
+        boolean persistencePass = dbService.performIntegrityAudit(testRepo, liveData);
+
+        System.out.println("   STATUS: " + (persistencePass ? "✅ PASS" : "❌ FAIL (SCHEMA_MISMATCH)"));
+
+        if (persistencePass) {
+            System.out.println("   > Action: Object Serialized for Supabase Push");
+            System.out.println("   > Mapping: { repo: \"" + testRepo + "\", commit_count: " + liveData.size() + " }");
+            System.out.println("   > Sync Status: READY_FOR_DASHBOARD_REFRESH");
+        } else {
+            System.out.println("   > Error: No live data available to map to database.");
+            System.out.println("   > Note: Check GitHub connection in Block 2.");
+        }
 
         // --- TEST CASE 5: PLANNED FEATURE (AI Verification) ---
         boolean aiServiceActive = false; // Planned for Sprint 4
@@ -75,9 +101,7 @@ public class testHarness {
         System.out.println("\n[BLOCK 5] AI Skill Verification (Beta/Planned)");
         System.out.println("   STATUS: ❌ FAIL (Feature Not Implemented)");
         System.out.println("   > Target Service: Gemini AI Skill Validator");
-        System.out.println("   > Attempted Input: 'Validating Node.js experience via Commit History'");
-        System.out.println("   > Error: [503] SERVICE_UNAVAILABLE");
-        System.out.println("   > Note: Hook established; Logic pending Sprint 4.");
+        System.out.println("   > Predicted Input: 'Validating Node.js experience via Commit History'");
 
         System.out.println("\n==================================================");
         System.out.println("   FINAL AUDIT: 4 SUCCESSES | 1 PLANNED FAILURE  ");
