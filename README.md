@@ -1,10 +1,11 @@
-## How to Run Project
+ Portfol.io
 
-1. Open IntellaJ IDEA IDE
-2. Open The terminal
-3. INstall Dependancies:
-4.    npm install
-5.    npm run dev
+## How to Run the Project
 
-Running server Will show in Terminal Window
-   
+1. Open the project folder in VS Code
+2. Open the terminal
+3. Install dependencies:
+
+```bash
+npm install
+npm run dev
