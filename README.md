@@ -2,7 +2,7 @@
 
 ## How to Run the Project
 
-1. Open the project folder in VS Code
+1. Open the project folder in Intellij IDEA IDE
 2. Open the terminal
 3. Install dependencies:
 
