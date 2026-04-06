@@ -1,5 +1,3 @@
-// Mock data structure - replace with your backend API calls
-
 export interface Project {
   id: string;
   title: string;
@@ -13,6 +11,7 @@ export interface Project {
   createdAt: string;
   isGroupProject?: boolean;
   personalContribution?: string;
+  verified?: boolean;
 }
 
 export interface Portfolio {
@@ -26,7 +25,6 @@ export interface Portfolio {
   projects: Project[];
 }
 
-// Mock current user portfolio
 export const mockUserPortfolio: Portfolio = {
   id: 'user-1',
   userId: 'user-1',
@@ -48,6 +46,7 @@ export const mockUserPortfolio: Portfolio = {
       createdAt: '2025-12-15',
       isGroupProject: true,
       personalContribution: 'Led frontend development, architected the React component library, and implemented the shopping cart and checkout flow. Collaborated with two backend developers to integrate payment processing and real-time inventory updates.',
+      verified: true,
     },
     {
       id: 'proj-2',
@@ -58,6 +57,7 @@ export const mockUserPortfolio: Portfolio = {
       tags: ['Branding', 'Logo Design', 'Figma', 'Illustrator'],
       projectUrl: 'https://behance.net/project',
       createdAt: '2026-01-10',
+      verified: false,
     },
     {
       id: 'proj-3',
@@ -68,11 +68,11 @@ export const mockUserPortfolio: Portfolio = {
       tags: ['React', 'TypeScript', 'WebSocket', 'PostgreSQL'],
       githubUrl: 'https://github.com/johndoe/taskapp',
       createdAt: '2025-11-20',
+      verified: true,
     },
   ],
 };
 
-// Mock public portfolio (what someone would see when shared)
 export const mockPublicPortfolio: Portfolio = {
   id: 'user-2',
   userId: 'user-2',
@@ -91,6 +91,7 @@ export const mockPublicPortfolio: Portfolio = {
       tags: ['React', 'D3.js', 'WCAG', 'Accessibility'],
       projectUrl: 'https://example.com/a11y-dashboard',
       createdAt: '2026-02-01',
+      verified: true,
     },
   ],
 };
