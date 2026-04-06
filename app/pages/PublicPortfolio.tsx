@@ -4,6 +4,7 @@ import { Mail, ExternalLink } from 'lucide-react';
 import { ProjectCard } from '../components/ProjectCard';
 import { SearchFilters, matchesProjectSource } from '../components/SearchFilters';
 import { mockUserPortfolio, mockPublicPortfolio } from '../data/mockData';
+import { ProjectSorter, SortByDateStrategy} from '../strategies/projectSortStrategy';
 
 export function PublicPortfolio() {
   const { username } = useParams<{ username: string }>();
@@ -38,6 +39,11 @@ export function PublicPortfolio() {
       return matchesSearch && matchesCategory && matchesTag && matchesSource && matchesVerified;
     });
   }, [portfolio.projects, searchTerm, selectedCategory, selectedTag, selectedSource, verifiedOnly]);
+
+  const sortedProjects = useMemo(() => {
+    const sorter = new ProjectSorter(new SortByDateStrategy());
+    return sorter.sort(filteredProjects);
+  }, [filteredProjects]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -97,8 +103,11 @@ export function PublicPortfolio() {
           </div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} isPublic={true} />
+            {/* {filteredProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} isPublic={true} onTagClick={setSelectedTag} />
+            ))} */}
+            {sortedProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} isPublic={true} onTagClick={setSelectedTag} />
             ))}
           </div>
         )}
