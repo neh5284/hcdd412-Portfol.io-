@@ -198,18 +198,18 @@ export function Dashboard() {
     setIsFormOpen(true);
   };
 
-  // --- DESIGN PATTERN: Sort by Column (Data Pattern) ---
+  // DESIGN PATTERN: Sort by Column
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   const sortData = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
 
-    // Toggle direction if the same column is clicked
+    // Toggle direction
     if (sortConfig?.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
 
-    // Direct manipulation of the project list currently in state
+    // Direct manipulation of the project list
     const sortedProjects = [...portfolio.projects].sort((a: any, b: any) => {
       if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
       if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
