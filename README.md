@@ -21,7 +21,7 @@ npm run dev
 | **ssh5490**    | Syed Jeel Hussain          | **Search Filters** (UI Pattern) | `SearchFilters.tsx`, `PublicPortfolio.tsx`, `ProjectCard.tsx`, `mockData.ts`             |
 | **neh5284**    | Nathan Hinkle              | **....** (Creational)           |  |
 | **neh5284**    | Nathan Hinkle              | **....** (UI Pattern)           |                                                                                                                |
-| **cfw5511**    | Jasper Chengtian Wang      | **Strategy** (Creational)           |                                                                                                                |
-| **cfw5511**    | Jasper Chengtian Wang      | **Tagging** (UI Pattern)           |                                                                                                                |
+| **cfw5511**    | Jasper Chengtian Wang      | **Strategy** (Creational)       |  `app/strategies/projectSortStrategy.ts` , `app/pages/PublicPortfolio.tsx`  |
+| **cfw5511**    | Jasper Chengtian Wang      | **Tagging** (UI Pattern)        |  `app/components/ProjectCard.tsx`, `app/pages/PublicPortfolio.tsx`, `app/components/SearchFilters.tsx`   |
 
 ---
