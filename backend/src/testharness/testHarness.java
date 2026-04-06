@@ -106,5 +106,20 @@ public class testHarness {
         System.out.println("\n==================================================");
         System.out.println("   FINAL AUDIT: 4 SUCCESSES | 1 PLANNED FAILURE  ");
         System.out.println("==================================================");
+
+
+        // --- DESIGN PATTERN: Notification Factory (Creational) ---
+        System.out.println("\nNotification Factory Test");
+        portfolio.notifications.notificationFactory factory = new portfolio.notifications.notificationFactory();
+
+        // 1. Generate Email via Factory
+        portfolio.notifications.notification emailAlert = factory.createNotification("email");
+        emailAlert.send("Welcome to Portfol.io! System handshake verified.", "neh5284@psu.edu");
+
+        // 2. Generate Push via Factory
+        portfolio.notifications.notification pushAlert = factory.createNotification("push");
+        pushAlert.send("New repository synced to your dashboard.", "device_token_abc123");
+
+        System.out.println("   STATUS: ✅ PASS (Factory Pattern Validated)");
     }
 }

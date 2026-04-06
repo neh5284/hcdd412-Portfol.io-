@@ -198,6 +198,28 @@ export function Dashboard() {
     setIsFormOpen(true);
   };
 
+  // --- DESIGN PATTERN: Sort by Column (Data Pattern) ---
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const sortData = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+
+    // Toggle direction if the same column is clicked
+    if (sortConfig?.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+
+    // Direct manipulation of the project list currently in state
+    const sortedProjects = [...portfolio.projects].sort((a: any, b: any) => {
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setPortfolio({ ...portfolio, projects: sortedProjects });
+    setSortConfig({ key, direction });
+  };
+
   if (loading) {
     return (
         <div className="min-h-screen bg-white p-10">
@@ -249,7 +271,15 @@ export function Dashboard() {
           </div>
 
           <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-3xl font-bold">Your Projects ({portfolio.projects.length})</h2>
+            <h2
+                className="text-3xl font-bold cursor-pointer hover:underline select-none flex items-center gap-2"
+                onClick={() => sortData('title')}
+            >
+              Your Projects ({portfolio.projects.length})
+              <span className="text-xl opacity-50">
+                  {sortConfig?.key === 'title' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : '↕'}
+              </span>
+            </h2>
             <button
                 onClick={() => {
                   setEditingProject(null);
@@ -297,5 +327,6 @@ export function Dashboard() {
           )}
         </div>
       </div>
+
   );
 }
