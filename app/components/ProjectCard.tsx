@@ -7,9 +7,10 @@ interface ProjectCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   isPublic?: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
-export function ProjectCard({ project, onEdit, onDelete, isPublic = false }: ProjectCardProps) {
+export function ProjectCard({ project, onEdit, onDelete, isPublic = false, onTagClick }: ProjectCardProps) {
   const categoryColors = {
     coding: 'bg-black text-white',
     visual: 'bg-white text-black border-2 border-black',
@@ -49,11 +50,24 @@ export function ProjectCard({ project, onEdit, onDelete, isPublic = false }: Pro
         </div>
       )}
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      {/* <div className="mb-4 flex flex-wrap gap-2">
         {project.tags.map((tag) => (
           <span key={tag} className="border border-black px-2 py-1 text-xs">
             {tag}
           </span>
+        ))}
+      </div> */}
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {project.tags.map((tag) => (
+          <button
+            key={tag}
+            type="button"
+            onClick={() => onTagClick?.(tag)}
+            className="border border-black px-2 py-1 text-xs transition-all hover:bg-black hover:text-white"
+          >
+            {tag}
+          </button>
         ))}
       </div>
 
