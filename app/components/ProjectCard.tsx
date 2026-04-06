@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ExternalLink, Github, Calendar, Users } from 'lucide-react';
+import { ExternalLink, Github, Calendar, Users, BadgeCheck } from 'lucide-react';
 import { Project } from '../data/mockData';
 
 interface ProjectCardProps {
@@ -19,9 +19,17 @@ export function ProjectCard({ project, onEdit, onDelete, isPublic = false }: Pro
 
   return (
     <div className="group border-2 border-black bg-white p-6 transition-all hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-      <div className="mb-4 flex items-start justify-between">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h3 className="mb-2 text-xl font-bold">{project.title}</h3>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <h3 className="text-xl font-bold">{project.title}</h3>
+            {project.verified && (
+              <span className="inline-flex items-center gap-1 border border-black px-2 py-1 text-[11px] font-bold uppercase">
+                <BadgeCheck className="h-3 w-3" />
+                Verified
+              </span>
+            )}
+          </div>
           <p className="mb-3 text-sm opacity-70">{project.description}</p>
         </div>
         <span className={`ml-4 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase ${categoryColors[project.category]}`}>
