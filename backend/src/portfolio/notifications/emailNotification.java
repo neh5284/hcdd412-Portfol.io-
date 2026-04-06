@@ -3,7 +3,7 @@ package portfolio.notifications;
 public class emailNotification implements notification {
     @Override
     public void send(String message, String recipient) {
-        // Using your school email as the logical system sender
+        // simulated, need to connect with SMTP
         String sender = "neh5284@psu.edu";
 
         System.out.println("--------------------------------------------------");

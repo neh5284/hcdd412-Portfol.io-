@@ -112,7 +112,7 @@ public class testHarness {
         System.out.println("\nNotification Factory Test");
         portfolio.notifications.notificationFactory factory = new portfolio.notifications.notificationFactory();
 
-        // 1. Generate Email via Factory
+        // 1. Generate Email via Factory (simulated)
         portfolio.notifications.notification emailAlert = factory.createNotification("email");
         emailAlert.send("Welcome to Portfol.io! System handshake verified.", "neh5284@psu.edu");
 
