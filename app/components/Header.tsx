@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { getSession, signOut } from '../services/authApi';
+import { getAuthUser, signOut } from '../services/authApi';
 
 const navItems = [
     { to: '/dashboard', label: 'Dashboard', active: (pathname: string) => pathname === '/dashboard' },
@@ -20,10 +20,10 @@ export function Header() {
 
         const loadSession = async () => {
             try {
-                const session = await getSession();
+                const user = await getAuthUser();
 
                 if (active) {
-                    setAuthenticated(Boolean(session));
+                    setAuthenticated(Boolean(user));
                 }
             } catch {
                 if (active) {

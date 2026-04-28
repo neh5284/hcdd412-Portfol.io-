@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import { getSession } from '../services/authApi';
+import { getAuthUser } from '../services/authApi';
 
 interface RequireAuthProps {
     children: ReactNode;
@@ -15,11 +15,11 @@ export function RequireAuth({ children }: RequireAuthProps) {
 
         const checkSession = async () => {
             try {
-                const session = await getSession();
+                const user = await getAuthUser();
 
                 if (!active) return;
 
-                setStatus(session ? 'authenticated' : 'unauthenticated');
+                setStatus(user ? 'authenticated' : 'unauthenticated');
             } catch {
                 if (!active) return;
 

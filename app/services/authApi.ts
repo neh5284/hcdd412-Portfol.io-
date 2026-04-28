@@ -20,13 +20,13 @@ export async function getSession() {
 }
 
 export async function getAuthUser() {
-    const { data, error } = await supabase.auth.getUser();
+    const session = await getSession();
 
-    if (error) {
-        throw new Error(error.message || 'User could not be loaded.');
+    if (!session?.user) {
+        return null;
     }
 
-    return data.user;
+    return session.user;
 }
 
 export async function signInWithEmail({ email, password }: AuthCredentials) {
