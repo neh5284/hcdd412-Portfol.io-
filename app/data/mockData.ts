@@ -1,9 +1,23 @@
+export interface ProjectMedia {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  mimeType: string;
+  altText?: string;
+}
+
 export interface Project {
   id: string;
   title: string;
   description: string;
   narrative: string;
-  category: 'coding' | 'visual' | 'design' | 'other';
+  problem?: string;
+  process?: string;
+  outcome?: string;
+  role?: string;
+  narrativeIsDraft?: boolean;
+  category: 'coding' | 'visual' | 'design' | 'research' | 'other';
   tags: string[];
   imageUrl?: string;
   projectUrl?: string;
@@ -12,6 +26,11 @@ export interface Project {
   isGroupProject?: boolean;
   personalContribution?: string;
   verified?: boolean;
+  isPublic?: boolean;
+  verificationStatus?: string;
+  verificationScore?: number;
+  verificationFeedback?: string;
+  media?: ProjectMedia[];
 }
 
 export interface Portfolio {
@@ -19,79 +38,49 @@ export interface Portfolio {
   userId: string;
   username: string;
   displayName: string;
+  title: string;
   bio: string;
   tagline: string;
   email: string;
+  visibility?: 'public' | 'unlisted' | 'private';
+  shareToken?: string;
+  shareUrl?: string;
   projects: Project[];
 }
 
-export const mockUserPortfolio: Portfolio = {
-  id: 'user-1',
+export const mockPortfolio: Portfolio = {
+  id: 'portfolio-1',
   userId: 'user-1',
-  username: 'johndoe',
-  displayName: 'John Doe',
-  bio: 'Software Engineer & Designer passionate about creating meaningful digital experiences.',
+  username: 'neh5284',
+  displayName: 'Nathan Hinkle',
+  title: 'Nathan Hinkle Portfolio',
+  bio: 'Human-Centered Design and Development student focused on building clean, useful software.',
   tagline: 'Building the future, one project at a time.',
-  email: 'john.doe@email.com',
+  email: 'neh5284@psu.edu',
+  visibility: 'public',
+  shareToken: 'sample-share-token',
+  shareUrl: '/share/sample-share-token',
   projects: [
     {
-      id: 'proj-1',
-      title: 'E-Commerce Platform',
-      description: 'Full-stack e-commerce solution with React and Node.js',
-      narrative: 'Developed a comprehensive e-commerce platform that handles inventory management, payment processing, and user authentication. Built with scalability in mind, the platform supports thousands of concurrent users and implements best practices for security and performance optimization.',
+      id: 'project-1',
+      title: 'Portfol.io',
+      description: 'A Supabase-backed portfolio platform for technical and creative work.',
+      narrative: 'This project solves the problem of scattered portfolio content.',
+      problem: 'Students need one place to present code, design, documents, and project context.',
+      process: 'Built a dashboard, profile editor, public portfolio, and structured Supabase schema.',
+      outcome: 'The result is a clearer portfolio system with shareable public pages.',
+      role: 'Implemented core frontend and database integration.',
       category: 'coding',
-      tags: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-      projectUrl: 'https://example.com/ecommerce',
-      githubUrl: 'https://github.com/johndoe/ecommerce',
-      createdAt: '2025-12-15',
-      isGroupProject: true,
-      personalContribution: 'Led frontend development, architected the React component library, and implemented the shopping cart and checkout flow. Collaborated with two backend developers to integrate payment processing and real-time inventory updates.',
-      verified: true,
-    },
-    {
-      id: 'proj-2',
-      title: 'Brand Identity Design',
-      description: 'Complete brand identity for a tech startup',
-      narrative: 'Created a cohesive brand identity including logo design, color palette, typography system, and brand guidelines. The design reflects the company\'s innovative approach while maintaining professionalism and approachability.',
-      category: 'visual',
-      tags: ['Branding', 'Logo Design', 'Figma', 'Illustrator'],
-      projectUrl: 'https://behance.net/project',
-      createdAt: '2026-01-10',
-      verified: false,
-    },
-    {
-      id: 'proj-3',
-      title: 'Task Management App',
-      description: 'Real-time collaborative task management application',
-      narrative: 'Built a real-time task management application with WebSocket integration for live collaboration. Features include drag-and-drop task organization, team collaboration tools, and advanced filtering capabilities.',
-      category: 'coding',
-      tags: ['React', 'TypeScript', 'WebSocket', 'PostgreSQL'],
-      githubUrl: 'https://github.com/johndoe/taskapp',
-      createdAt: '2025-11-20',
-      verified: true,
-    },
-  ],
-};
-
-export const mockPublicPortfolio: Portfolio = {
-  id: 'user-2',
-  userId: 'user-2',
-  username: 'janesmth',
-  displayName: 'Jane Smith',
-  bio: 'UX Designer & Frontend Developer specializing in accessible, user-centered design.',
-  tagline: 'Designing with purpose and empathy.',
-  email: 'jane.smith@email.com',
-  projects: [
-    {
-      id: 'proj-4',
-      title: 'Accessibility Dashboard',
-      description: 'Analytics dashboard for web accessibility monitoring',
-      narrative: 'Designed and developed a comprehensive accessibility monitoring dashboard that helps teams track and improve their web accessibility compliance. The tool automatically scans web pages and provides actionable insights.',
-      category: 'coding',
-      tags: ['React', 'D3.js', 'WCAG', 'Accessibility'],
-      projectUrl: 'https://example.com/a11y-dashboard',
+      tags: ['React', 'Supabase', 'TypeScript'],
+      projectUrl: 'https://example.com',
+      githubUrl: 'https://github.com/neh5284/hcdd412-Portfol.io-',
       createdAt: '2026-02-01',
+      isGroupProject: true,
+      personalContribution: 'Built the dashboard, profile, public portfolio, and database integration.',
       verified: true,
+      isPublic: true,
+      verificationStatus: 'verified',
+      verificationScore: 0.95,
     },
   ],
 };
