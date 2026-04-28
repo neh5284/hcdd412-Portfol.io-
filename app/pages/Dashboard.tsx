@@ -1,10 +1,10 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ProjectCard } from '../components/ProjectCard';
 import { ProjectForm } from '../components/ProjectForm';
 import { Portfolio, Project } from '../data/mockData';
 import { deleteProject, getCurrentPortfolio, regenerateShareLink, saveProject } from '../services/portfolioApi';
 import { getPortfolioStats, sortProjectsByKey, SortDirection } from '../lib/portfolioUtils';
-
 export function Dashboard() {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);

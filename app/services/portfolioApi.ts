@@ -381,7 +381,7 @@ export async function regenerateShareLink(portfolioId: string): Promise<ShareLin
         .eq('portfolio_id', portfolioId)
         .eq('is_active', true);
 
-    const token = crypto.randomUUID().replaceAll('-', '');
+    const token = crypto.randomUUID().replace(/-/g, '');
 
     const insertResult = await supabase
         .from('share_links')
