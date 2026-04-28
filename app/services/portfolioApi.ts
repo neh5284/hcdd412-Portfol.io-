@@ -11,8 +11,6 @@ import {
     VerificationRecord,
 } from '../lib/portfolioUtils';
 
-const FALLBACK_USER_EMAIL = 'neh5284@psu.edu';
-
 export interface ProfileUpdateInput {
     displayName: string;
     title: string;
@@ -79,29 +77,57 @@ function assertNoError<T>(result: QueryResult<T>, fallbackMessage: string): T {
     if (result.error) {
         throw new Error(result.error.message || fallbackMessage);
     }
+
     if (!result.data) {
         throw new Error(fallbackMessage);
     }
+
     return result.data;
 }
 
 async function getCurrentUserRecord(): Promise<UserRecord> {
     const authResult = await supabase.auth.getUser();
-    const authUser = authResult.data.user;
 
-    if (authUser?.id) {
-        const byId = await supabase.from('users').select('*').eq('id', authUser.id).single();
-
-        if (!byId.error && byId.data) {
-            return byId.data as UserRecord;
-        }
+    if (authResult.error || !authResult.data.user) {
+        throw new Error('You must be logged in to view this page.');
     }
 
-    const byEmail = await supabase.from('users').select('*').eq('email', FALLBACK_USER_EMAIL).single();
+    const authUser = authResult.data.user;
+
+    const userResult = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+    if (userResult.error) {
+        throw new Error(userResult.error.message || 'User profile could not be loaded.');
+    }
+
+    if (userResult.data) {
+        return userResult.data as UserRecord;
+    }
+
+    const fallbackName =
+        typeof authUser.user_metadata?.name === 'string'
+            ? authUser.user_metadata.name
+            : authUser.email?.split('@')[0] || 'Portfolio Owner';
+
+    const insertResult = await supabase
+        .from('users')
+        .insert([
+            {
+                id: authUser.id,
+                name: fallbackName,
+                email: authUser.email,
+            },
+        ])
+        .select('*')
+        .single();
 
     return assertNoError<UserRecord>(
-        byEmail as QueryResult<UserRecord>,
-        `No user found for ${FALLBACK_USER_EMAIL}.`,
+        insertResult as QueryResult<UserRecord>,
+        'User profile could not be created.',
     );
 }
 
@@ -114,12 +140,42 @@ async function getUserById(userId: string): Promise<UserRecord> {
     );
 }
 
-async function getPortfolioByUserId(userId: string): Promise<PortfolioRecord> {
-    const result = await supabase.from('portfolios').select('*').eq('user_id', userId).single();
+async function ensurePortfolioForUser(user: UserRecord): Promise<PortfolioRecord> {
+    const existing = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    if (existing.error) {
+        throw new Error(existing.error.message || 'Portfolio could not be loaded.');
+    }
+
+    if (existing.data) {
+        return existing.data as PortfolioRecord;
+    }
+
+    const username = user.email?.includes('@') ? user.email.split('@')[0] : `user-${String(user.id).slice(0, 8)}`;
+    const displayName = user.name || username;
+
+    const created = await supabase
+        .from('portfolios')
+        .insert([
+            {
+                user_id: user.id,
+                title: `${displayName} Portfolio`,
+                username,
+                tagline: 'Building the future, one project at a time.',
+                bio: '',
+                visibility: 'public',
+            },
+        ])
+        .select('*')
+        .single();
 
     return assertNoError<PortfolioRecord>(
-        result as QueryResult<PortfolioRecord>,
-        'No portfolio found for this user.',
+        created as QueryResult<PortfolioRecord>,
+        'Portfolio could not be created.',
     );
 }
 
@@ -191,6 +247,7 @@ async function getShareLinkByPortfolioId(portfolioId: string): Promise<ShareLink
 async function buildPortfolio(user: UserRecord, portfolio: PortfolioRecord): Promise<Portfolio> {
     const projects = await getProjectsByPortfolioId(String(portfolio.id));
     const projectIds = projects.map((project) => String(project.id));
+
     const [narratives, verifications, media, shareLink] = await Promise.all([
         getNarrativesByProjectIds(projectIds),
         getVerificationsByProjectIds(projectIds),
@@ -208,7 +265,7 @@ async function buildPortfolio(user: UserRecord, portfolio: PortfolioRecord): Pro
 
 export async function getCurrentPortfolio(): Promise<Portfolio> {
     const user = await getCurrentUserRecord();
-    const portfolio = await getPortfolioByUserId(String(user.id));
+    const portfolio = await ensurePortfolioForUser(user);
 
     return buildPortfolio(user, portfolio);
 }
@@ -219,14 +276,19 @@ export async function getPortfolioByUsername(username: string): Promise<Portfoli
         .select('*')
         .eq('username', username)
         .in('visibility', ['public', 'unlisted'])
-        .single();
+        .maybeSingle();
 
-    const portfolio = assertNoError<PortfolioRecord>(
-        portfolioResult as QueryResult<PortfolioRecord>,
-        `No public portfolio found for ${username}.`,
-    );
+    if (portfolioResult.error) {
+        throw new Error(portfolioResult.error.message || `No public portfolio found for ${username}.`);
+    }
 
+    if (!portfolioResult.data) {
+        throw new Error(`No public portfolio found for ${username}.`);
+    }
+
+    const portfolio = portfolioResult.data as PortfolioRecord;
     const user = await getUserById(String(portfolio.user_id));
+
     return buildPortfolio(user, portfolio);
 }
 
@@ -255,6 +317,7 @@ export async function getPortfolioByShareToken(token: string): Promise<Portfolio
     );
 
     const user = await getUserById(String(portfolio.user_id));
+
     return buildPortfolio(user, portfolio);
 }
 
@@ -264,8 +327,7 @@ export async function updateProfile(portfolio: Portfolio, input: ProfileUpdateIn
         .update({ name: input.displayName })
         .eq('id', portfolio.userId);
 
-    if (userUpdate.error) {
-        throw new Error(userUpdate.error.message || 'User profile could not be updated.');
+    if (userUpdate.error) { throw new Error(userUpdate.error.message || 'User profile could not be updated.');
     }
 
     const portfolioUpdate = await supabase

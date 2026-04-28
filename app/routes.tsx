@@ -4,6 +4,9 @@ import { Landing } from './pages/Landing';
 import { Dashboard } from './pages/Dashboard';
 import { PublicPortfolio } from './pages/PublicPortfolio';
 import { Profile } from './pages/Profile';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { RequireAuth } from './components/RequireAuth';
 
 export const router = createBrowserRouter([
   {
@@ -11,8 +14,24 @@ export const router = createBrowserRouter([
     Component: Layout,
     children: [
       { index: true, Component: Landing },
-      { path: 'dashboard', Component: Dashboard },
-      { path: 'profile', Component: Profile },
+      { path: 'login', Component: Login },
+      { path: 'signup', Component: Signup },
+      {
+        path: 'dashboard',
+        element: (
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+        ),
+      },
       { path: 'portfolio/:username', Component: PublicPortfolio },
       { path: 'share/:token', Component: PublicPortfolio },
     ],

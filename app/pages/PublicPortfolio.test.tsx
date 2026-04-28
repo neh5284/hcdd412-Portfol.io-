@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,6 +17,7 @@ const mockedGetPortfolioByShareToken = vi.mocked(getPortfolioByShareToken);
 
 describe('PublicPortfolio', () => {
     beforeEach(() => {
+        vi.clearAllMocks();
         mockedGetPortfolioByUsername.mockResolvedValue(testPortfolio);
         mockedGetPortfolioByShareToken.mockResolvedValue(testPortfolio);
     });

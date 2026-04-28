@@ -1,8 +1,13 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Profile } from './Profile';
 import { testPortfolio } from '../test/fixtures';
+
+vi.mock('../services/authApi', () => ({
+    getSession: vi.fn().mockResolvedValue({ user: { id: 'user-1' } }),
+}));
 
 vi.mock('../services/portfolioApi', () => ({
     getCurrentPortfolio: vi.fn(),
@@ -16,6 +21,7 @@ const mockedGetCurrentPortfolio = vi.mocked(getCurrentPortfolio);
 
 describe('Profile', () => {
     beforeEach(() => {
+        vi.clearAllMocks();
         mockedGetCurrentPortfolio.mockResolvedValue(testPortfolio);
     });
 

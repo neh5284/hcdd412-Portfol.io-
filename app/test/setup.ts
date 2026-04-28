@@ -1,4 +1,5 @@
 import { Portfolio } from '../data/mockData';
+import '@testing-library/jest-dom/vitest';
 
 export const testPortfolio: Portfolio = {
     id: 'portfolio-1',

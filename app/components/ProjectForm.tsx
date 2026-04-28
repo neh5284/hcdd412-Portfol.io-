@@ -90,7 +90,12 @@ export function ProjectForm({ project, onSave, onCancel }: ProjectFormProps) {
                 <label className="mb-2 block text-sm font-bold">Category</label>
                 <select
                     value={formData.category}
-                    onChange={(event) => setFormData({ ...formData, category: event.target.value })}
+                    onChange={(event) =>
+                        setFormData({
+                          ...formData,
+                          category: event.target.value as Project['category'],
+                        })
+                    }
                     className="w-full border-2 border-black p-3 focus:outline-none focus:ring-2 focus:ring-black"
                 >
                   <option value="coding">Coding</option>

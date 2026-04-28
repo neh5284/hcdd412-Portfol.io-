@@ -1,8 +1,13 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Dashboard } from './Dashboard';
 import { testPortfolio } from '../test/fixtures';
+
+vi.mock('../services/authApi', () => ({
+    getSession: vi.fn().mockResolvedValue({ user: { id: 'user-1' } }),
+}));
 
 vi.mock('../services/portfolioApi', () => ({
     getCurrentPortfolio: vi.fn(),
@@ -17,6 +22,7 @@ const mockedGetCurrentPortfolio = vi.mocked(getCurrentPortfolio);
 
 describe('Dashboard', () => {
     beforeEach(() => {
+        vi.clearAllMocks();
         mockedGetCurrentPortfolio.mockResolvedValue(testPortfolio);
     });
 
@@ -43,7 +49,10 @@ describe('Dashboard', () => {
             </MemoryRouter>,
         );
 
-        await waitFor(() => expect(screen.getByText('Dashboard unavailable')).toBeInTheDocument());
+        await waitFor(() => {
+            expect(screen.getByText('Dashboard unavailable')).toBeInTheDocument();
+        });
+
         expect(screen.getByText('Supabase unavailable')).toBeInTheDocument();
     });
 });
