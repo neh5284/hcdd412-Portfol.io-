@@ -86,18 +86,22 @@ function assertNoError<T>(result: QueryResult<T>, fallbackMessage: string): T {
 }
 
 async function getCurrentUserRecord(): Promise<UserRecord> {
-    const authResult = await supabase.auth.getUser();
+    const sessionResult = await supabase.auth.getSession();
 
-    if (authResult.error || !authResult.data.user) {
-        throw new Error('You must be logged in to view this page.');
+    if (sessionResult.error) {
+        throw new Error(sessionResult.error.message || 'Session could not be loaded.');
     }
 
-    const authUser = authResult.data.user;
+    const sessionUser = sessionResult.data.session?.user;
+
+    if (!sessionUser) {
+        throw new Error('You must be logged in to view this page.');
+    }
 
     const userResult = await supabase
         .from('users')
         .select('*')
-        .eq('id', authUser.id)
+        .eq('id', sessionUser.id)
         .maybeSingle();
 
     if (userResult.error) {
@@ -109,17 +113,17 @@ async function getCurrentUserRecord(): Promise<UserRecord> {
     }
 
     const fallbackName =
-        typeof authUser.user_metadata?.name === 'string'
-            ? authUser.user_metadata.name
-            : authUser.email?.split('@')[0] || 'Portfolio Owner';
+        typeof sessionUser.user_metadata?.name === 'string'
+            ? sessionUser.user_metadata.name
+            : sessionUser.email?.split('@')[0] || 'Portfolio Owner';
 
     const insertResult = await supabase
         .from('users')
         .insert([
             {
-                id: authUser.id,
+                id: sessionUser.id,
                 name: fallbackName,
-                email: authUser.email,
+                email: sessionUser.email,
             },
         ])
         .select('*')
