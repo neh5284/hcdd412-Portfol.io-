@@ -2,6 +2,8 @@
 
 A portfolio web application built with React, TypeScript, Vite, Tailwind CSS, and Supabase.
 
+---
+
 ## Setup
 
 Install dependencies:
@@ -10,11 +12,13 @@ Install dependencies:
 npm install
 ```
 
-Run the app:
+Run the application:
 
 ```bash
 npm run dev
 ```
+
+---
 
 ## If you get a Vite error
 
@@ -24,9 +28,9 @@ If you see errors like:
 Cannot find module ... vite/dist/node/chunks/...
 ```
 
-or the app will not start, run these EXACT commands in PowerShell:
+Run the following in PowerShell:
 
-```
+```powershell
 Ctrl + C
 
 Remove-Item -Recurse -Force node_modules
@@ -39,16 +43,39 @@ npm install -D vite@6.3.5 vitest@3.2.4
 npm run test
 ```
 
-Then start the app again:
+Then restart:
 
 ```bash
 npm run dev
 ```
 
+---
+
+## Test Account (Required for Grading)
+
+Use the following credentials:
+
+- Email: neh5284@psu.edu  
+- Password: test123  
+
+---
+
+## Team Contributions
+
+| Team Member ID | Team Member Name           | % Effort | Contribution |
+|----------------|---------------------------|----------|-------------|
+| neh5284        | Nathan Edward Hinkle      | 25%      | Frontend development, dashboard UI, dark mode implementation, Supabase integration, Backend logic |
+| pmb5775        | Prageethraj Bharaneedharan| 25%      | Frontend development, Backend logic, API integration, testing support |
+| ssh5490        | Syed Sharjeel Hussain     | 25%      | Feature development, debugging, UI improvements, testing support |
+| cfw5511        | Jasper Chengtian Wang     | 25%      | Testing, validation, UI refinement and Creation, project support |
+
+---
+
 ## Notes
 
-* If the UI looks unstyled, make sure Tailwind is included in `styles/index.css`
-* If dark mode does not persist, make sure it is saved and loaded from `localStorage`
+- If the UI appears unstyled, ensure Tailwind is included in `styles/index.css`
+- Dark mode is stored in `localStorage` and applied globally on app load
+- Public portfolio links are dynamically generated per user
 
 
 ## Team-Member Design Pattern Implementation Ledger
