@@ -1,15 +1,55 @@
- Portfol.io
+# portfol.io
 
-## How to Run the Project
+A portfolio web application built with React, TypeScript, Vite, Tailwind CSS, and Supabase.
 
-1. Open the project folder in Intellij IDEA IDE
-2. Open the terminal
-3. Install dependencies:
+## Setup
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run the app:
+
+```bash
 npm run dev
 ```
+
+## If you get a Vite error
+
+If you see errors like:
+
+```
+Cannot find module ... vite/dist/node/chunks/...
+```
+
+or the app will not start, run these EXACT commands in PowerShell:
+
+```
+Ctrl + C
+
+Remove-Item -Recurse -Force node_modules
+Remove-Item -Force package-lock.json
+
+npm cache clean --force
+npm install
+npm install -D vite@6.3.5 vitest@3.2.4
+
+npm run test
+```
+
+Then start the app again:
+
+```bash
+npm run dev
+```
+
+## Notes
+
+* If the UI looks unstyled, make sure Tailwind is included in `styles/index.css`
+* If dark mode does not persist, make sure it is saved and loaded from `localStorage`
+
 
 ## Team-Member Design Pattern Implementation Ledger
 
