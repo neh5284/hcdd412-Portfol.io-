@@ -1,137 +1,251 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { FormEvent, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { supabase } from '../supabaseClient';
+import { getAuthUser, signOut } from '../services/authApi';
 
-export default function Settings() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export function Settings() {
+  const navigate = useNavigate();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    loadUser();
-
-    const saved = localStorage.getItem("darkMode");
-    if (saved === "true") setDarkMode(true);
+    const saved = localStorage.getItem('darkMode');
+    setDarkMode(saved === 'true');
+    void loadSettings();
   }, []);
 
-  // 🔥 apply dark mode globally
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
 
-    localStorage.setItem("darkMode", darkMode.toString());
+    localStorage.setItem('darkMode', String(darkMode));
   }, [darkMode]);
 
-  async function loadUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const loadSettings = async () => {
+    setLoading(true);
+    setError('');
 
-    if (user) {
-      setEmail(user.email || "");
+    try {
+      const user = await getAuthUser();
 
-      const { data } = await supabase
-        .from("users")
-        .select("name")
-        .eq("id", user.id)
-        .single();
+      if (!user) {
+        throw new Error('You must be logged in to view settings.');
+      }
 
-      if (data) setName(data.name);
+      setEmail(user.email || '');
+
+      const userResult = await supabase
+          .from('users')
+          .select('name, email')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (userResult.error) {
+        throw new Error(userResult.error.message || 'Settings could not be loaded.');
+      }
+
+      if (userResult.data) {
+        setName(userResult.data.name || '');
+        setEmail(userResult.data.email || user.email || '');
+      } else {
+        const fallbackName =
+            typeof user.user_metadata?.name === 'string'
+                ? user.user_metadata.name
+                : user.email?.split('@')[0] || 'Portfolio Owner';
+
+        const insertResult = await supabase
+            .from('users')
+            .insert([
+              {
+                id: user.id,
+                name: fallbackName,
+                email: user.email,
+              },
+            ])
+            .select('name, email')
+            .single();
+
+        if (insertResult.error) {
+          throw new Error(insertResult.error.message || 'Settings profile could not be created.');
+        }
+
+        setName(insertResult.data.name || '');
+        setEmail(insertResult.data.email || user.email || '');
+      }
+    } catch (requestError) {
+      setError(
+          requestError instanceof Error
+              ? requestError.message
+              : 'Settings could not be loaded.',
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
-  }
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  async function handleSave() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    setSaving(true);
+    setError('');
+    setNotice('');
 
-    if (!user) return;
+    try {
+      const user = await getAuthUser();
 
-    await supabase.from("users").update({ name }).eq("id", user.id);
+      if (!user) {
+        throw new Error('You must be logged in to save settings.');
+      }
 
-    alert("Saved!");
-  }
+      const result = await supabase
+          .from('users')
+          .update({
+            name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  }
+      if (result.error) {
+        throw new Error(result.error.message || 'Settings could not be saved.');
+      }
+
+      setNotice('Settings saved.');
+    } catch (requestError) {
+      setError(
+          requestError instanceof Error
+              ? requestError.message
+              : 'Settings could not be saved.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login', { replace: true });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900 text-black dark:text-white">
-        Loading...
-      </div>
+        <div className="min-h-screen bg-white text-black dark:bg-neutral-950 dark:text-white">
+          <div className="mx-auto max-w-4xl px-6 py-12">
+            <div className="border-2 border-black p-8 dark:border-white">
+              <h1 className="text-2xl font-bold">Loading settings...</h1>
+              <p className="mt-2 opacity-70">Fetching account settings.</p>
+            </div>
+          </div>
+        </div>
+    );
+  }
+
+  if (error && !email) {
+    return (
+        <div className="min-h-screen bg-white text-black dark:bg-neutral-950 dark:text-white">
+          <div className="mx-auto max-w-4xl px-6 py-12">
+            <div className="border-4 border-black p-10 dark:border-white">
+              <h1 className="mb-3 text-3xl font-bold">Settings unavailable</h1>
+              <p className="mb-6 opacity-70">{error}</p>
+              <button
+                  type="button"
+                  onClick={loadSettings}
+                  className="border-2 border-black bg-black px-6 py-3 font-bold text-white dark:border-white dark:bg-white dark:text-black"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-black dark:text-white transition-colors duration-300">
-      {/* ✅ FIXED: pt-10 instead of mt-10 */}
-      <div className="max-w-2xl mx-auto px-6 pt-10">
-        <h1 className="text-3xl font-bold mb-8">Settings</h1>
+      <div className="min-h-screen bg-white text-black transition-colors duration-300 dark:bg-neutral-950 dark:text-white">
+        <div className="mx-auto max-w-2xl px-6 py-12">
+          <h1 className="mb-8 text-4xl font-bold">Settings</h1>
 
-        {/* ACCOUNT */}
-        <div className="border rounded-xl p-6 mb-6 bg-white dark:bg-neutral-800 dark:border-neutral-700">
-          <h2 className="text-xl font-semibold mb-4">Account</h2>
+          {(error || notice) && (
+              <div className="mb-6 border-2 border-black p-4 dark:border-white">
+                <p className="font-bold">{error || notice}</p>
+              </div>
+          )}
 
-          <div className="mb-4">
-            <label className="block text-sm mb-1">Name</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border px-3 py-2 rounded-md bg-white dark:bg-neutral-700 dark:text-white dark:border-neutral-600"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm mb-1">Email</label>
-            <input
-              value={email}
-              disabled
-              className="w-full border px-3 py-2 rounded-md bg-gray-100 dark:bg-neutral-700 dark:text-gray-300 dark:border-neutral-600"
-            />
-          </div>
-
-          <button
-            onClick={handleSave}
-            className="bg-black text-white px-4 py-2 rounded-md hover:opacity-80 dark:bg-white dark:text-black"
+          <form
+              onSubmit={handleSave}
+              className="mb-6 border-2 border-black bg-white p-6 dark:border-white dark:bg-neutral-900"
           >
-            Save Changes
-          </button>
-        </div>
+            <h2 className="mb-4 text-xl font-bold">Account</h2>
 
-        {/* APPEARANCE */}
-        <div className="border rounded-xl p-6 mb-6 bg-white dark:bg-neutral-800 dark:border-neutral-700">
-          <h2 className="text-xl font-semibold mb-4">Appearance</h2>
+            <div className="mb-4">
+              <label htmlFor="settings-name" className="mb-2 block text-sm font-bold">
+                Name
+              </label>
+              <input
+                  id="settings-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className="w-full border-2 border-black bg-white px-3 py-2 text-black dark:border-white dark:bg-neutral-800 dark:text-white"
+              />
+            </div>
 
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-            Dark Mode
-          </label>
-        </div>
+            <div className="mb-4">
+              <label htmlFor="settings-email" className="mb-2 block text-sm font-bold">
+                Email
+              </label>
+              <input
+                  id="settings-email"
+                  value={email}
+                  disabled
+                  className="w-full border-2 border-black bg-gray-100 px-3 py-2 text-black opacity-70 dark:border-white dark:bg-neutral-800 dark:text-white"
+              />
+            </div>
 
-        {/* SECURITY */}
-        <div className="border rounded-xl p-6 bg-white dark:bg-neutral-800 dark:border-neutral-700">
-          <h2 className="text-xl font-semibold mb-4">Security</h2>
+            <button
+                type="submit"
+                disabled={saving}
+                className="bg-black px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </form>
 
-          <button
-            onClick={handleLogout}
-            className="border border-black px-4 py-2 rounded-md hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
-          >
-            Log Out
-          </button>
+          <section className="mb-6 border-2 border-black bg-white p-6 dark:border-white dark:bg-neutral-900">
+            <h2 className="mb-4 text-xl font-bold">Appearance</h2>
+
+            <label className="flex items-center gap-3 font-bold">
+              <input
+                  type="checkbox"
+                  checked={darkMode}
+                  onChange={(event) => setDarkMode(event.target.checked)}
+                  className="h-5 w-5 accent-black dark:accent-white"
+              />
+              Dark Mode
+            </label>
+          </section>
+
+          <section className="border-2 border-black bg-white p-6 dark:border-white dark:bg-neutral-900">
+            <h2 className="mb-4 text-xl font-bold">Security</h2>
+
+            <button
+                type="button"
+                onClick={handleLogout}
+                className="border-2 border-black px-4 py-2 font-bold transition-all hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
+            >
+              Log Out
+            </button>
+          </section>
         </div>
       </div>
-    </div>
   );
 }
+
+export default Settings;

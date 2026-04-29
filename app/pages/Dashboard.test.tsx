@@ -51,8 +51,10 @@ describe('Dashboard major features', () => {
         expect(screen.getByText('Beta Design')).toBeInTheDocument();
         expect(screen.getByText('Private Research Draft')).toBeInTheDocument();
 
-        expect(screen.getByText(/Projects:/i)).toBeInTheDocument();
-        expect(screen.getByText(/Verified:/i)).toBeInTheDocument();
+        expect(screen.getByText('Projects')).toBeInTheDocument();
+        expect(screen.getAllByText('Verified').length).toBeGreaterThan(0);
+        expect(screen.getByText('Categories')).toBeInTheDocument();
+        expect(screen.getByText('Group')).toBeInTheDocument();
     });
 
     it('opens the add project form', async () => {
