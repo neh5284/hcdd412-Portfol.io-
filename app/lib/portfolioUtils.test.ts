@@ -4,76 +4,84 @@ import {
     filterProjects,
     getPortfolioStats,
     mapProjectRecord,
+    normalizeCategory,
     normalizeTags,
     sortProjectsByKey,
 } from './portfolioUtils';
-import { testPortfolio } from '../test/fixtures';
+import {
+    fetchedBasicNarratives,
+    fetchedBasicPortfolio,
+    fetchedBasicProjects,
+    fetchedBasicShareLink,
+    fetchedBasicUser,
+    fetchedBasicVerificationResults,
+    testPortfolio,
+} from '../test/fixtures';
 
-describe('portfolio utilities', () => {
-    it('normalizes comma-separated tags', () => {
-        expect(normalizeTags('React, Supabase,  TypeScript')).toEqual(['React', 'Supabase', 'TypeScript']);
+describe('portfolio data utilities', () => {
+    it('normalizes categories and tags from fetched records', () => {
+        expect(normalizeCategory('coding')).toBe('coding');
+        expect(normalizeCategory('wrong-value')).toBe('other');
+
+        expect(normalizeTags('React, Supabase, TypeScript')).toEqual([
+            'React',
+            'Supabase',
+            'TypeScript',
+        ]);
+
+        expect(normalizeTags(['React', 'Supabase'])).toEqual(['React', 'Supabase']);
+        expect(normalizeTags(null)).toEqual([]);
     });
 
-    it('maps Supabase project records into UI project objects', () => {
+    it('maps a fetched project row into a UI project object', () => {
         const project = mapProjectRecord(
-            {
-                id: 'p1',
-                title: 'Mapped Project',
-                description: 'Short description',
-                category: 'coding',
-                tags: ['React'],
-                source_url: 'https://example.com',
-                github_url: 'https://github.com/example/repo',
-                created_at: '2026-02-01',
-                is_group_project: true,
-                personal_contribution: 'Implemented the API layer.',
-                status: 'verified',
-            },
-            {
-                project_id: 'p1',
-                content: 'Narrative',
-                problem: 'Problem text',
-                process: 'Process text',
-                outcome: 'Outcome text',
-                role: 'Role text',
-                is_draft: false,
-            },
+            fetchedBasicProjects[0],
+            fetchedBasicNarratives[0],
+            fetchedBasicVerificationResults[0],
         );
 
-        expect(project).toMatchObject({
-            id: 'p1',
-            title: 'Mapped Project',
-            category: 'coding',
-            projectUrl: 'https://example.com',
-            githubUrl: 'https://github.com/example/repo',
-            isGroupProject: true,
-            verified: true,
-            problem: 'Problem text',
-        });
+        expect(project.id).toBe('project-1');
+        expect(project.title).toBe('Alpha Project');
+        expect(project.description).toBe('React dashboard project');
+        expect(project.category).toBe('coding');
+        expect(project.tags).toEqual(['React', 'Supabase']);
+        expect(project.projectUrl).toBe('https://example.com/alpha');
+        expect(project.githubUrl).toBe('https://github.com/neh5284/alpha');
+        expect(project.isGroupProject).toBe(true);
+        expect(project.personalContribution).toBe('Owned the frontend dashboard.');
+        expect(project.verified).toBe(true);
+        expect(project.verificationScore).toBe(0.95);
+        expect(project.problem).toBe('Portfolio work is scattered.');
+        expect(project.process).toBe('Built a dashboard and API service layer.');
+        expect(project.outcome).toBe('Portfolio content is easier to manage.');
+        expect(project.role).toBe('Owned the frontend dashboard.');
     });
 
-    it('builds a portfolio from user, portfolio, and project records', () => {
+    it('builds a complete portfolio from fetched user, portfolio, projects, narratives, verification, and share-link data', () => {
         const portfolio = buildPortfolioFromRecords(
-            { id: 'u1', email: 'person@example.com', name: 'Person Example' },
+            fetchedBasicUser,
+            fetchedBasicPortfolio,
+            fetchedBasicProjects,
             {
-                id: 'pf1',
-                user_id: 'u1',
-                title: 'Person Portfolio',
-                username: 'person',
-                bio: 'Bio from database',
-                tagline: 'Tagline from database',
+                narratives: fetchedBasicNarratives,
+                verifications: fetchedBasicVerificationResults,
+                shareLink: fetchedBasicShareLink,
             },
-            [{ id: 'p1', title: 'API Project', description: 'Loaded from Supabase' }],
-            { shareLink: { share_token: 'abc123' } },
         );
 
-        expect(portfolio.username).toBe('person');
-        expect(portfolio.displayName).toBe('Person Example');
-        expect(portfolio.shareToken).toBe('abc123');
-        expect(portfolio.projects).toHaveLength(1);
+        expect(portfolio.id).toBe('portfolio-1');
+        expect(portfolio.userId).toBe('user-1');
+        expect(portfolio.username).toBe('neh5284');
+        expect(portfolio.displayName).toBe('Nathan Hinkle');
+        expect(portfolio.title).toBe('Nathan Portfolio');
+        expect(portfolio.email).toBe('neh5284@psu.edu');
+        expect(portfolio.shareToken).toBe('share-token-1');
+        expect(portfolio.shareUrl).toBe('/share/share-token-1');
+        expect(portfolio.projects).toHaveLength(3);
+        expect(portfolio.projects[0].title).toBe('Alpha Project');
     });
 
-    it('filters by search, category, source, tag, and verification state', () => {
+    it('filters fetched projects by search, category, tag, source, and verification', () => {
         const filtered = filterProjects(testPortfolio.projects, {
             searchTerm: 'dashboard',
             selectedCategory: 'coding',
@@ -82,22 +90,28 @@ describe('portfolio utilities', () => {
             verifiedOnly: true,
         });
 
-        expect(filtered.map((project) => project.id)).toEqual(['project-1']);
+        expect(filtered).toHaveLength(1);
+        expect(filtered[0].id).toBe('project-1');
     });
 
-    it('sorts projects without mutating the original list', () => {
-        const sorted = sortProjectsByKey(testPortfolio.projects, 'title', 'desc');
+    it('sorts projects by title and date', () => {
+        const byTitle = sortProjectsByKey(testPortfolio.projects, 'title', 'asc');
+        expect(byTitle.map((project) => project.title)).toEqual([
+            'Alpha Project',
+            'Beta Design',
+            'Private Research Draft',
+        ]);
 
-        expect(sorted.map((project) => project.title)).toEqual(['Beta Design', 'Alpha Project']);
-        expect(testPortfolio.projects.map((project) => project.title)).toEqual(['Alpha Project', 'Beta Design']);
+        const byDateDesc = sortProjectsByKey(testPortfolio.projects, 'createdAt', 'desc');
+        expect(byDateDesc[0].title).toBe('Private Research Draft');
     });
 
-    it('returns dashboard stats', () => {
+    it('calculates dashboard statistics', () => {
         expect(getPortfolioStats(testPortfolio.projects)).toEqual({
-            total: 2,
+            total: 3,
             verified: 1,
             groupProjects: 1,
-            categories: 2,
+            categories: 3,
         });
     });
 });

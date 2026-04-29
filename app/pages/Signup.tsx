@@ -80,8 +80,11 @@ export function Signup() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="mb-2 block text-sm font-bold">Name</label>
+                            <label htmlFor="signup-name" className="mb-2 block text-sm font-bold">
+                                Name
+                            </label>
                             <input
+                                id="signup-name"
                                 required
                                 type="text"
                                 value={name}
@@ -92,8 +95,11 @@ export function Signup() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-bold">Email</label>
+                            <label htmlFor="signup-email" className="mb-2 block text-sm font-bold">
+                                Email
+                            </label>
                             <input
+                                id="signup-email"
                                 required
                                 type="email"
                                 value={email}
@@ -104,8 +110,11 @@ export function Signup() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-bold">Password</label>
+                            <label htmlFor="signup-password" className="mb-2 block text-sm font-bold">
+                                Password
+                            </label>
                             <input
+                                id="signup-password"
                                 required
                                 type="password"
                                 value={password}
@@ -116,8 +125,11 @@ export function Signup() {
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm font-bold">Confirm Password</label>
+                            <label htmlFor="signup-confirm-password" className="mb-2 block text-sm font-bold">
+                                Confirm Password
+                            </label>
                             <input
+                                id="signup-confirm-password"
                                 required
                                 type="password"
                                 value={confirmPassword}

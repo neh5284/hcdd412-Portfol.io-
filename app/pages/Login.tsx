@@ -84,8 +84,11 @@ export function Login() {
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
-                                <label className="mb-2 block text-sm font-bold">Email</label>
+                                <label htmlFor="login-email" className="mb-2 block text-sm font-bold">
+                                    Email
+                                </label>
                                 <input
+                                    id="login-email"
                                     required
                                     type="email"
                                     value={email}
@@ -96,8 +99,11 @@ export function Login() {
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-bold">Password</label>
+                                <label htmlFor="login-password" className="mb-2 block text-sm font-bold">
+                                    Password
+                                </label>
                                 <input
+                                    id="login-password"
                                     required
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}

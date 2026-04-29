@@ -1,48 +1,14 @@
-import { Portfolio } from '../data/mockData';
 import '@testing-library/jest-dom/vitest';
+import { vi } from 'vitest';
 
-export const testPortfolio: Portfolio = {
-    id: 'portfolio-1',
-    userId: 'user-1',
-    username: 'neh5284',
-    displayName: 'Nathan Hinkle',
-    title: 'Nathan Hinkle Portfolio',
-    email: 'neh5284@psu.edu',
-    tagline: 'Building the future, one project at a time.',
-    bio: 'Human-Centered Design and Development student.',
-    visibility: 'public',
-    shareToken: 'share-token-1',
-    shareUrl: '/share/share-token-1',
-    projects: [
-        {
-            id: 'project-1',
-            title: 'Alpha Project',
-            description: 'React dashboard project',
-            narrative: 'Built a dashboard with Supabase data.',
-            problem: 'Portfolio work is scattered.',
-            process: 'Built a dashboard and API service layer.',
-            outcome: 'Portfolio content is easier to manage.',
-            role: 'Owned the frontend dashboard.',
-            category: 'coding',
-            tags: ['React', 'Supabase'],
-            projectUrl: 'https://example.com/alpha',
-            githubUrl: 'https://github.com/neh5284/alpha',
-            createdAt: '2026-01-02',
-            isGroupProject: true,
-            personalContribution: 'Owned the frontend dashboard.',
-            verified: true,
-            isPublic: true,
-        },
-        {
-            id: 'project-2',
-            title: 'Beta Design',
-            description: 'Visual identity project',
-            narrative: 'Created a design system.',
-            category: 'design',
-            tags: ['Figma'],
-            createdAt: '2026-03-05',
-            verified: false,
-            isPublic: true,
-        },
-    ],
-};
+Object.defineProperty(navigator, 'clipboard', {
+    value: {
+        writeText: vi.fn(),
+    },
+    configurable: true,
+});
+
+Object.defineProperty(window, 'confirm', {
+    value: vi.fn(() => true),
+    configurable: true,
+});
