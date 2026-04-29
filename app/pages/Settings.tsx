@@ -4,6 +4,28 @@ import { supabase } from '../supabaseClient';
 import { getAuthUser, signOut } from '../services/authApi';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+type ThemePreference = 'light' | 'dark';
+
+const THEME_STORAGE_KEY = 'portfolioTheme';
+
+function readTheme(): ThemePreference {
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+  if (storedTheme === 'dark' || storedTheme === 'light') {
+    return storedTheme;
+  }
+
+  return 'light';
+}
+
+function applyTheme(theme: ThemePreference) {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+  // Remove old keys so they cannot override this setting later.
+  localStorage.removeItem('darkMode');
+  localStorage.removeItem('portfolioSettings');
+}
 
 export function Settings() {
   const navigate = useNavigate();
@@ -13,7 +35,7 @@ export function Settings() {
   const [originalName, setOriginalName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
+  const [theme, setTheme] = useState<ThemePreference>('light');
 
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
@@ -23,17 +45,19 @@ export function Settings() {
   const hasUnsavedChanges = name.trim() !== originalName.trim();
 
   useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(savedDarkMode);
-    document.documentElement.classList.toggle('dark', savedDarkMode);
+    const savedTheme = readTheme();
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
 
     void loadSettings();
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('darkMode', String(darkMode));
-  }, [darkMode]);
+  const handleThemeChange = (nextTheme: ThemePreference) => {
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+    setNotice(`Theme changed to ${nextTheme}.`);
+    setError('');
+  };
 
   const loadSettings = async () => {
     setLoading(true);
@@ -184,22 +208,13 @@ export function Settings() {
               <h1 className="mb-3 text-3xl font-bold">Settings unavailable</h1>
               <p className="mb-6 opacity-70">{error}</p>
 
-              <div className="flex flex-wrap gap-3">
-                <button
-                    type="button"
-                    onClick={loadSettings}
-                    className="border-2 border-black bg-black px-6 py-3 font-bold text-white transition-all hover:bg-white hover:text-black dark:border-white dark:bg-white dark:text-black dark:hover:bg-neutral-950 dark:hover:text-white"
-                >
-                  Retry
-                </button>
-
-                <Link
-                    to="/login"
-                    className="border-2 border-black px-6 py-3 font-bold transition-all hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
-                >
-                  Go to Login
-                </Link>
-              </div>
+              <button
+                  type="button"
+                  onClick={loadSettings}
+                  className="border-2 border-black bg-black px-6 py-3 font-bold text-white transition-all hover:bg-white hover:text-black dark:border-white dark:bg-white dark:text-black dark:hover:bg-neutral-950 dark:hover:text-white"
+              >
+                Retry
+              </button>
             </div>
           </div>
         </div>
@@ -209,7 +224,7 @@ export function Settings() {
   const publicPortfolioUrl = username ? `/portfolio/${username}` : '';
 
   return (
-      <div className="min-h-screen bg-white text-black transition-colors duration-300 dark:bg-neutral-950 dark:text-white">
+      <div className="min-h-screen bg-white text-black transition-colors dark:bg-neutral-950 dark:text-white">
         <div className="mx-auto max-w-5xl px-6 py-12">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -218,7 +233,7 @@ export function Settings() {
               </p>
               <h1 className="text-4xl font-bold">Settings</h1>
               <p className="mt-2 opacity-70">
-                Manage basic account and display settings.
+                Manage account details and theme.
               </p>
             </div>
 
@@ -245,7 +260,7 @@ export function Settings() {
                 <div className="mb-6 border-b-2 border-black pb-4 dark:border-white">
                   <h2 className="text-2xl font-bold">Account Details</h2>
                   <p className="mt-1 text-sm opacity-70">
-                    Update the display name used in your dashboard and portfolio.
+                    Update your display name.
                   </p>
                 </div>
 
@@ -278,9 +293,6 @@ export function Settings() {
                         disabled
                         className="w-full border-2 border-black bg-gray-100 px-3 py-3 text-black opacity-70 dark:border-white dark:bg-neutral-800 dark:text-white"
                     />
-                    <p className="mt-2 text-sm opacity-60">
-                      Email is managed by Supabase Auth and is shown here for reference.
-                    </p>
                   </div>
                 </div>
 
@@ -307,30 +319,42 @@ export function Settings() {
                         Reset
                       </button>
                   )}
-
-                  {saveStatus === 'saved' && (
-                      <span className="text-sm font-bold opacity-70">Saved</span>
-                  )}
                 </div>
               </form>
 
               <section className="border-4 border-black bg-white p-6 dark:border-white dark:bg-neutral-900">
                 <div className="mb-6 border-b-2 border-black pb-4 dark:border-white">
-                  <h2 className="text-2xl font-bold">Appearance</h2>
+                  <h2 className="text-2xl font-bold">Theme</h2>
                   <p className="mt-1 text-sm opacity-70">
-                    This setting is saved in this browser.
+                    Theme is saved in this browser.
                   </p>
                 </div>
 
-                <label className="flex items-center justify-between gap-4 border-2 border-black p-4 font-bold dark:border-white">
-                  <span>Dark Mode</span>
-                  <input
-                      type="checkbox"
-                      checked={darkMode}
-                      onChange={(event) => setDarkMode(event.target.checked)}
-                      className="h-5 w-5 accent-black dark:accent-white"
-                  />
-                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                      type="button"
+                      onClick={() => handleThemeChange('light')}
+                      className={`border-2 px-5 py-4 font-bold transition-all ${
+                          theme === 'light'
+                              ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+                              : 'border-black bg-white text-black hover:bg-black hover:text-white dark:border-white dark:bg-neutral-900 dark:text-white dark:hover:bg-white dark:hover:text-black'
+                      }`}
+                  >
+                    Light
+                  </button>
+
+                  <button
+                      type="button"
+                      onClick={() => handleThemeChange('dark')}
+                      className={`border-2 px-5 py-4 font-bold transition-all ${
+                          theme === 'dark'
+                              ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+                              : 'border-black bg-white text-black hover:bg-black hover:text-white dark:border-white dark:bg-neutral-900 dark:text-white dark:hover:bg-white dark:hover:text-black'
+                      }`}
+                  >
+                    Dark
+                  </button>
+                </div>
               </section>
 
               <section className="border-4 border-black bg-white p-6 dark:border-white dark:bg-neutral-900">
@@ -367,8 +391,8 @@ export function Settings() {
                   </div>
 
                   <div>
-                    <p className="font-bold">User ID</p>
-                    <p className="break-all font-mono text-xs opacity-70">{userId || 'Not available'}</p>
+                    <p className="font-bold">Theme</p>
+                    <p className="capitalize opacity-70">{theme}</p>
                   </div>
                 </div>
               </section>
