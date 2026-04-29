@@ -6,6 +6,7 @@ const navItems = [
     { to: '/dashboard', label: 'Dashboard', active: (pathname: string) => pathname === '/dashboard' },
     { to: '/portfolio/neh5284', label: 'Public View', active: (pathname: string) => pathname.startsWith('/portfolio/') || pathname.startsWith('/share/') },
     { to: '/profile', label: 'Profile', active: (pathname: string) => pathname === '/profile' },
+
 ];
 
 export function Header() {
