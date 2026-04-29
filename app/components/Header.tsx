@@ -69,7 +69,7 @@ export function Header() {
       to: publicPortfolioPath,
       label: 'Public View',
       active: (pathname: string) =>
-          pathname.startsWith('/portfolio/') || pathname.startsWith('/share/'),
+        pathname.startsWith('/portfolio/') || pathname.startsWith('/share/'),
     },
     {
       to: '/profile',
@@ -97,79 +97,76 @@ export function Header() {
   };
 
   return (
-      <header className="border-b border-black bg-white dark:border-white dark:bg-neutral-950 dark:text-white">
-        <nav className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <Link to="/" className="text-2xl font-bold tracking-tight">
-              portfol.io
-            </Link>
+    <header className="border-b border-black bg-black text-white dark:border-white dark:bg-neutral-950">
+      <nav className="mx-auto max-w-7xl px-6 py-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <Link to="/" className="text-2xl font-bold tracking-tight">
+            portfol.io
+          </Link>
 
-            {!isLanding && (
-                <div className="flex flex-wrap items-center gap-4 md:gap-6">
-                  {authenticated &&
-                      navItems.map(({ to, label, active }) => {
-                        const isActive = active(location.pathname);
-                        const isPill = label === 'Profile' || label === 'Settings';
+          {!isLanding && (
+            <div className="flex flex-wrap items-center gap-3 md:gap-4">
+              {authenticated &&
+                navItems.map(({ to, label, active }) => {
+                  const isActive = active(location.pathname);
 
-                        return (
-                            <Link
-                                key={label}
-                                to={to}
-                                className={
-                                  isPill
-                                      ? `rounded-full border-2 border-black px-4 py-2 transition-all hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black ${
-                                          isActive
-                                              ? 'bg-black text-white dark:bg-white dark:text-black'
-                                              : 'bg-white text-black dark:bg-neutral-950 dark:text-white'
-                                      }`
-                                      : `transition-opacity hover:opacity-60 ${
-                                          isActive ? 'opacity-100' : 'opacity-40'
-                                      }`
-                                }
-                            >
-                              {label}
-                            </Link>
-                        );
-                      })}
+                  return (
+                    <Link
+                      key={label}
+                      to={to}
+                      className={`px-4 py-2 text-sm font-bold rounded-full transition-all ${
+                        isActive
+                          ? 'bg-white text-black'
+                          : 'text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
 
-                  {!authenticated && (
-                      <>
-                        <Link
-                            to="/login"
-                            className={`transition-opacity hover:opacity-60 ${
-                                location.pathname === '/login' ? 'opacity-100' : 'opacity-40'
-                            }`}
-                        >
-                          Login
-                        </Link>
+              {!authenticated && (
+                <>
+                  <Link
+                    to="/login"
+                    className={`px-4 py-2 text-sm font-bold rounded-full transition-all ${
+                      location.pathname === '/login'
+                        ? 'bg-white text-black'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Login
+                  </Link>
 
-                        <Link
-                            to="/signup"
-                            className={`rounded-full border-2 border-black px-4 py-2 transition-all hover:bg-black hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-black ${
-                                location.pathname === '/signup'
-                                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                                    : 'bg-white text-black dark:bg-neutral-950 dark:text-white'
-                            }`}
-                        >
-                          Sign Up
-                        </Link>
-                      </>
-                  )}
+                  <Link
+                    to="/signup"
+                    className={`px-4 py-2 text-sm font-bold rounded-full transition-all ${
+                      location.pathname === '/signup'
+                        ? 'bg-white text-black'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
 
-                  {authenticated && (
-                      <button
-                          type="button"
-                          onClick={handleLogout}
-                          disabled={loggingOut}
-                          className="border-2 border-black bg-white px-4 py-2 font-bold transition-all hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white dark:bg-neutral-950 dark:text-white dark:hover:bg-white dark:hover:text-black"
-                      >
-                        {loggingOut ? 'Logging out...' : 'Log Out'}
-                      </button>
-                  )}
-                </div>
-            )}
-          </div>
-        </nav>
-      </header>
+              {authenticated && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="px-4 py-2 text-sm font-bold rounded-full transition-all text-white/70 hover:text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loggingOut ? 'Logging out...' : 'Log Out'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }
+
+export default Header;
