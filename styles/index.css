@@ -1,18 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* optional reset (you can keep yours below if you want) */
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    background: #ffffff;
-    color: #000000;
+  background: #ffffff;
+  color: #000000;
 }
 
 body {
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
-    background: #ffffff;
-    color: #000000;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
 }
 
 button,
@@ -20,5 +23,5 @@ a,
 input,
 textarea,
 select {
-    font: inherit;
+  font: inherit;
 }
